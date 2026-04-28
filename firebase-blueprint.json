@@ -1,0 +1,108 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile and role information",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "role": { "type": "string" },
+        "address": { "type": "string" },
+        "phone": { "type": "string" },
+        "totalLand": { "type": "string" },
+        "landDetails": { "type": "string" },
+        "coords": { "type": "array", "items": { "type": "number" } },
+        "avatar": { "type": "string" }
+      },
+      "required": ["role"]
+    },
+    "Crop": {
+      "title": "Crop",
+      "description": "Crop listings across the network",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "type": { "type": "string" },
+        "quantity": { "type": "number" },
+        "unit": { "type": "string" },
+        "status": { "type": "string" },
+        "pricePerUnit": { "type": "number" },
+        "farmerName": { "type": "string" },
+        "farmerLocation": { "type": "string" },
+        "estimatedHarvestDate": { "type": "string" },
+        "growthStage": { "type": "string" },
+        "farmerId": { "type": "string" }
+      },
+      "required": ["name", "quantity", "pricePerUnit", "status"]
+    },
+    "Order": {
+      "title": "Order",
+      "description": "Transaction records between market participants",
+      "type": "object",
+      "properties": {
+        "cropId": { "type": "string" },
+        "cropName": { "type": "string" },
+        "cropUnit": { "type": "string" },
+        "farmerId": { "type": "string" },
+        "wholesalerId": { "type": "string" },
+        "retailerId": { "type": "string" },
+        "sellerRole": { "type": "string" },
+        "buyerRole": { "type": "string" },
+        "quantity": { "type": "number" },
+        "status": { "type": "string" },
+        "valueINR": { "type": "number" },
+        "driverId": { "type": "string" },
+        "driverName": { "type": "string" },
+        "otp": { "type": "string" }
+      },
+      "required": ["cropId", "quantity", "status"]
+    },
+    "Driver": {
+      "title": "Driver",
+      "description": "Logistics partner records",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "phone": { "type": "string" },
+        "experience": { "type": "string" },
+        "rating": { "type": "number" },
+        "status": { "type": "string" }
+      },
+      "required": ["name", "phone"]
+    },
+    "Alert": {
+      "title": "Alert",
+      "description": "News and system alerts",
+      "type": "object",
+      "properties": {
+        "type": { "type": "string" },
+        "message": { "type": "string" },
+        "severity": { "type": "string" },
+        "timestamp": { "type": "string" }
+      },
+      "required": ["message", "type", "severity", "timestamp"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "Stores user profiles"
+    },
+    "/crops/{cropId}": {
+      "schema": "Crop",
+      "description": "Stores all crop listings"
+    },
+    "/orders/{orderId}": {
+      "schema": "Order",
+      "description": "Stores all transaction orders"
+    },
+    "/drivers/{driverId}": {
+      "schema": "Driver",
+      "description": "Stores driver/logistics partner info"
+    },
+    "/alerts/{alertId}": {
+      "schema": "Alert",
+      "description": "Stores system and news alerts"
+    }
+  }
+}

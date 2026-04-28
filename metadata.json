@@ -1,0 +1,9 @@
+{
+  "name": "AgroFlow AI",
+  "description": "An AI-powered platform for smart agriculture and supply chain optimization, helping farmers prevent crop loss and maximize revenue through predictive analytics.",
+  "requestFramePermissions": [
+    "geolocation",
+    "microphone"
+  ],
+  "majorCapabilities": []
+}
