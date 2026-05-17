@@ -7,7 +7,7 @@ export interface DemandPrediction {
   confidence: number;
 }
 
-const API_KEY = (import.meta as any).env?.VITE_GEMINI_API_KEY || "";
+const API_KEY = import.meta.env.VITE_GEMINI_API_KEY || "";
 const genAI = new GoogleGenerativeAI(API_KEY);
 
 // Use a known working model. Based on test_gemini_3.ts, gemini-2.5-flash works.
@@ -27,8 +27,89 @@ Provide a helpful, concise response. If the user is requesting an action like cr
     return result.response.text();
   } catch (error: any) {
     console.error("AI Response error:", error);
+    
+    // Check if it's a quota/rate limit error
+    if (error.message?.includes('quota') || error.message?.includes('429') || error.message?.includes('rate limit')) {
+      // Return intelligent fallback response based on context
+      return getFallbackResponse(message, context);
+    }
+    
     throw new Error(error.message || "Failed to generate AI response.");
   }
+}
+
+// Intelligent fallback responses when API quota is exceeded
+function getFallbackResponse(message: string, context: any): string {
+  const lowerMessage = message.toLowerCase();
+  const role = context.role || 'user';
+  
+  // Order-related queries
+  if (lowerMessage.includes('order') || lowerMessage.includes('request')) {
+    if (role === 'wholesaler') {
+      return `I can help you place an order! To request crops from farmers, please:
+1. Browse available inventory in the Farmer Inventory section
+2. Select the crop you need
+3. Click "Request Order" to initiate the purchase
+
+Would you like me to help you find specific crops? {"action": "REQUEST_ORDER"}`;
+    }
+    if (role === 'farmer') {
+      return `I can help you manage orders! You have pending order requests that need your attention. Review them in your Orders section and accept or decline based on your inventory availability.`;
+    }
+  }
+  
+  // Inventory queries
+  if (lowerMessage.includes('inventory') || lowerMessage.includes('stock')) {
+    return `Your current inventory is displayed in the dashboard. You can:
+- Add new crops with quantity and pricing
+- Update existing inventory levels
+- Track organic certification status
+- Monitor demand predictions for each crop`;
+  }
+  
+  // Analytics queries
+  if (lowerMessage.includes('analytic') || lowerMessage.includes('report') || lowerMessage.includes('data')) {
+    return `The Analytics dashboard provides comprehensive insights including:
+- Revenue trends over time
+- Demand forecasting for your crops
+- Supply chain efficiency metrics
+- Market price predictions
+
+Navigate to the Analytics tab to view detailed reports.`;
+  }
+  
+  // Logistics queries
+  if (lowerMessage.includes('delivery') || lowerMessage.includes('logistics') || lowerMessage.includes('track')) {
+    return `Track your deliveries in real-time using our Logistics Map feature:
+- View active shipments on the map
+- Monitor estimated delivery times
+- Check route optimization
+- Receive automated status updates`;
+  }
+  
+  // Compliance queries
+  if (lowerMessage.includes('organic') || lowerMessage.includes('compliance') || lowerMessage.includes('certification')) {
+    return `Organic compliance tracking ensures product integrity:
+- Digital certification verification
+- Complete provenance history
+- Automated compliance checks
+- QR code generation for transparency
+
+View the Organic Compliance section for detailed tracking.`;
+  }
+  
+  // General help
+  return `I'm your AgroFlow AI assistant! I can help you with:
+
+🌾 **Inventory Management** - Track and manage your crops
+📊 **Analytics & Insights** - View demand predictions and trends
+🚚 **Logistics Tracking** - Monitor deliveries in real-time
+✅ **Organic Compliance** - Verify certifications and provenance
+📦 **Order Management** - Place and fulfill orders
+
+*Note: AI features are temporarily limited due to API quota. Full AI capabilities will resume shortly.*
+
+What would you like to know more about?`;
 }
 
 let demandPredictionsCache: any = null;

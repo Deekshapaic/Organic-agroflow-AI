@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { MessageSquare, X, Send, Bot, User, Sparkles, Mic, MicOff, Loader2 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
-import { getAiResponse, transcribeAudio } from '../services/openaiService';
+import { getAiResponse, transcribeAudio } from '../services/geminiService';
 import { UserRole, Order } from '../types';
 interface Message {
   role: 'user' | 'assistant';
@@ -70,7 +70,21 @@ export default function ChatBot({
   const handleTranscription = async (audioBlob: Blob) => {
     setIsTranscribing(true);
     try {
-      const transcription = await transcribeAudio(audioBlob);
+      // Convert Blob to base64 for Gemini API
+      const reader = new FileReader();
+      const base64Promise = new Promise<string>((resolve, reject) => {
+        reader.onloadend = () => {
+          const base64 = (reader.result as string).split(',')[1];
+          resolve(base64);
+        };
+        reader.onerror = reject;
+      });
+      reader.readAsDataURL(audioBlob);
+      
+      const base64Audio = await base64Promise;
+      const mimeType = audioBlob.type || 'audio/webm';
+      
+      const transcription = await transcribeAudio(base64Audio, mimeType);
       if (transcription) {
         setInput(prev => prev + (prev ? ' ' : '') + transcription);
       }
